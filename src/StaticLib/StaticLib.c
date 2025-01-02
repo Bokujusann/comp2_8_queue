@@ -11,6 +11,7 @@ void initialize(QUEUE* q, size_t mem_size)
 	if (q == NULL) return;
 
 	q->memory_begin = (int*)malloc(mem_size);
+	if (q->memory_begin == NULL) return;
 	q->memory_end = q->memory_begin + mem_size / sizeof(int);
 	q->head = q->memory_begin;
 	q->tail = q->memory_begin;
@@ -38,7 +39,19 @@ bool enqueue(QUEUE* q, int val)
 	// 上手くいかない場合にはfalseを返します
 	// メモリを使い切ったら先頭アドレスに戻って追加して下さい
 
-	return false;
+	if (q == NULL) return false;
+	if (countQueueableElements(q) <= 0) return false;
+
+	*q->tail = val;
+
+	if (q->tail == q->memory_end) {
+		q->tail = q->memory_begin;
+	}
+	else {
+		q->tail++;
+	}
+
+	return true;
 }
 
 
@@ -49,7 +62,17 @@ bool enqueue_array(QUEUE* q, int* addr, int num)
 	// 上手くいかない場合にはfalseを返します
 	// メモリを使い切ったら先頭アドレスに戻って追加して下さい
 
-	return false;
+	if (q == NULL || addr == NULL) return false;
+	if (num <= 0) return false;
+	if (countQueueableElements(q) < num) return false;
+
+	for (int i = 0; i < num; i++)
+	{
+		bool result = enqueue(q, addr[i]);
+		if (result == false)return false;
+	}
+
+	return true;
 }
 
 // キューから一つの要素を取り出す(不具合時は0を返す)
@@ -57,7 +80,19 @@ int dequeue(QUEUE* q)
 {
 	// ToDo: 先頭のデータを返します
 
-	return 0;
+	if (q == NULL || q->memory_begin == NULL) return 0;
+	if (isEmpty(q)) return 0;
+
+	int value = *(q->head);
+
+	if (q->head + 1 == q->memory_end) {
+		q->head = q->memory_begin;
+	}
+	else {
+		q->head++;
+	}
+
+	return value;
 }
 
 // addrにキューからnumの要素を取り出す。取り出せた個数を返す
@@ -65,7 +100,17 @@ int dequeue_array(QUEUE* q, int* addr, int num)
 {
 	// ToDo: 先頭からnum個のデータをaddrに格納します
 
-	return 0;
+	if (q == NULL || addr == NULL) return false;
+	if (num <= 0) return false;
+
+	for (int i = 0; i < num; i++)
+	{
+		int value = dequeue(q);
+		if (value == 0) return i;
+		addr[i] = value;
+	}
+
+	return num;
 }
 
 // キューが空かどうかを調べる
@@ -88,8 +133,12 @@ int countQueuedElements(const QUEUE* q)
 {
 	if (q == NULL || q->memory_begin == NULL) return 0;
 
-	int max_counts = getMaxCount(q);
-	return (q->head + max_counts - q->tail) % max_counts;
+	if (q->tail >= q->head) {
+		return  q->tail - q->head;
+	}
+	else {
+		return getMaxCount(q) - (q->head - q->tail);
+	}
 }
 
 // 挿入可能なデータ数を得る

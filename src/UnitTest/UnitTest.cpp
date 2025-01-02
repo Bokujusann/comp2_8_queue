@@ -247,8 +247,8 @@ namespace UnitTest
 
 			int a[2] = { 5, 7 };
 			Assert::IsTrue(enqueue_array(&q, a, 2), _T("2要素を入れるのに成功する"));
-			Assert::IsFalse(enqueue_array(&q, a, 2), _T("限界を超えて詰めない"));
-			Assert::IsFalse(enqueue(&q, 6), _T("限界を超えて詰めない"));
+			Assert::IsFalse(enqueue_array(&q, a, 2), _T("限界を超えて詰めない1"));
+			Assert::IsFalse(enqueue(&q, 6), _T("限界を超えて詰めない2"));
 
 			int b[2];
 			Assert::AreEqual(dequeue_array(&q, b, 2), 2, _T("2要素取り出す"));
